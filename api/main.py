@@ -168,6 +168,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "api.main:app",
         host="0.0.0.0",
-        port=8000,
+        # from environment variable or default to 8080
+        port=int(os.getenv("API_PORT", 8080)),
         reload=True
     )
