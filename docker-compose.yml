@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with PostGIS
+  database:
+    image: postgis/postgis:15-3.3
+    container_name: road_safety_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-roadsafety}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-roadsafety123}
+      POSTGRES_DB: ${DB_NAME:-road_safety}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01_init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U roadsafety -d road_safety"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: road_safety_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@roadsafety.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+    restart: unless-stopped
+
+  # FastAPI Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: road_safety_api
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-roadsafety}:${DB_PASSWORD:-roadsafety123}@database:5432/${DB_NAME:-road_safety}
+      API_SECRET_KEY: ${API_SECRET_KEY:-your-secret-key-change-in-production}
+    ports:
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - ./api:/app/api
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
