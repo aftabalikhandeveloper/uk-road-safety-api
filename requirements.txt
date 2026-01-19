@@ -1,12 +1,12 @@
 # # ETL Dependencies
 pandas>=2.0.0
-# geopandas>=0.14.0
-# shapely>=2.0.0
-# pyproj>=3.6.0
-# requests>=2.31.0
+geopandas>=0.14.0
+shapely>=2.0.0
+pyproj>=3.6.0
+requests>=2.31.0
 sqlalchemy>=2.0.0
-# psycopg2-binary>=2.9.9
-# GeoAlchemy2>=0.14.0
+psycopg2-binary>=2.9.9
+GeoAlchemy2>=0.14.0
 
 # API Dependencies
 fastapi>=0.109.0
